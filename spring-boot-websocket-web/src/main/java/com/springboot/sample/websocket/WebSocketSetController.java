@@ -1,5 +1,5 @@
 /**
- * FileName: WebSocketController
+ * FileName: WebSocketSetController
  * Author:   huang.yj
  * Date:     2019/9/27 14:05
  * Description: Demo1: 线程安全的Set来存放每个客户端对应的WebSocket Server对象
@@ -24,13 +24,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.0.0
  */
 @Component
-@ServerEndpoint("/websocket")
-public class WebSocketController {
+@ServerEndpoint("/websocket/set")
+public class WebSocketSetController {
     //静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。
     private static AtomicInteger onlineCount = new AtomicInteger(0);
 
     //concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。若要实现服务端与单一客户端通信的话，可以使用Map来存放，其中Key可以为用户标识
-    private static CopyOnWriteArraySet<WebSocketController> webSocketSet = new CopyOnWriteArraySet<WebSocketController>();
+    private static CopyOnWriteArraySet<WebSocketSetController> webSocketSet = new CopyOnWriteArraySet<WebSocketSetController>();
 
     //与某个客户端的连接会话，需要通过它来给客户端发送数据
     private Session session;
@@ -67,7 +67,7 @@ public class WebSocketController {
     public void onMessage(String message, Session session) {
         System.out.println("来自客户端的消息:" + message);
         //群发消息
-        for (WebSocketController item : webSocketSet) {
+        for (WebSocketSetController item : webSocketSet) {
             try {
                 item.sendMessage(message);
             } catch (IOException e) {
@@ -96,19 +96,19 @@ public class WebSocketController {
      * @throws IOException
      */
     public void sendMessage(String message) throws IOException {
-        this.session.getBasicRemote().sendText(message);
-        //this.session.getAsyncRemote().sendText(message);
+        this.session.getBasicRemote().sendText(message);  //同步、阻塞式的
+        //this.session.getAsyncRemote().sendText(message);  //异步、非阻塞式的、推荐使用
     }
 
     public static int getOnlineCount() {
-        return WebSocketController.onlineCount.get();
+        return WebSocketSetController.onlineCount.get();
     }
 
     public static void addOnlineCount() {
-        WebSocketController.onlineCount.incrementAndGet();
+        WebSocketSetController.onlineCount.incrementAndGet();
     }
 
     public static void subOnlineCount() {
-        WebSocketController.onlineCount.decrementAndGet();
+        WebSocketSetController.onlineCount.decrementAndGet();
     }
 }

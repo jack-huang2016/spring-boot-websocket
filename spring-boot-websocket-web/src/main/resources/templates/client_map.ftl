@@ -4,8 +4,10 @@
     <title>Java后端WebSocket的Tomcat实现</title>
 </head>
 <body>
-Welcome<br/><input id="text" type="text"/>
-<button onclick="send()">发送消息</button>
+Welcome:<br/>
+<input id="text" type="text"/>
+<button onclick="send()">发送消息</button><br/>
+To: <input id="toUserId" type="text"/>
 <hr/>
 <button onclick="closeWebSocket()">关闭WebSocket连接</button>
 <hr/>
@@ -14,9 +16,10 @@ Welcome<br/><input id="text" type="text"/>
 
 <script type="text/javascript">
     var websocket = null;
+    var currUserId = getQueryVariable('userId');
     //判断当前浏览器是否支持WebSocket
     if ('WebSocket' in window) {
-        websocket = new WebSocket("ws://localhost:8080/myWebSocket/websocket/set");
+        websocket = new WebSocket("ws://localhost:8080/myWebSocket/websocket/map/" + currUserId);
     }
     else {
         alert('当前浏览器 Not support websocket')
@@ -63,7 +66,23 @@ Welcome<br/><input id="text" type="text"/>
     //发送消息
     function send() {
         var message = document.getElementById('text').value;
-        websocket.send(message);
+        var toUserId = document.getElementById('toUserId').value;
+        var jsonObj = {};
+        jsonObj.message = message;
+        jsonObj.To = toUserId;
+        websocket.send(JSON.stringify(jsonObj));
+    }
+
+    // 获取url参数
+    function getQueryVariable(variable)
+    {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return(false);
     }
 </script>
 </html>
