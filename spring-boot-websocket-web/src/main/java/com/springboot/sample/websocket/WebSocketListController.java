@@ -1,8 +1,8 @@
 /**
- * FileName: WebSocketSetController
+ * FileName: WebSocketListController
  * Author:   huang.yj
  * Date:     2019/9/27 14:05
- * Description: Demo1: 线程安全的Set来存放每个客户端对应的WebSocket Server对象
+ * Description: Demo1: 线程安全的List来存放每个客户端对应的WebSocket Server对象
  */
 package com.springboot.sample.websocket;
 
@@ -11,11 +11,13 @@ import org.springframework.stereotype.Component;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 〈Demo1: 线程安全的Set来存放每个客户端对应的WebSocket Server对象〉
+ * 〈Demo3: 线程安全的List来存放每个客户端对应的WebSocket Server对象〉
  *  @ServerEndpoint 注解是一个类层次的注解，它的功能主要是将目前的类定义成一个websocket服务器端,
  *  注解的值将被用于监听用户连接的终端访问URL地址,客户端可以通过这个URL来连接到WebSocket服务器端
  *
@@ -24,13 +26,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.0.0
  */
 @Component
-@ServerEndpoint("/websocket/set")
-public class WebSocketSetController {
+@ServerEndpoint("/websocket/list")
+public class WebSocketListController {
     //静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。
     private static AtomicInteger onlineCount = new AtomicInteger(0);
 
-    //concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。若要实现服务端与单一客户端通信的话，可以使用Map来存放，其中Key可以为用户标识
-    private static CopyOnWriteArraySet<WebSocketSetController> webSocketSet = new CopyOnWriteArraySet<WebSocketSetController>();
+    //线程安全List，用来存放每个客户端对应的MyWebSocket对象。
+    private static Collection<WebSocketListController> webSocketList = Collections.synchronizedCollection(new ArrayList<WebSocketListController>());
 
     //与某个客户端的连接会话，需要通过它来给客户端发送数据
     private Session session;
@@ -42,7 +44,7 @@ public class WebSocketSetController {
      @OnOpen
      public void onOpen(Session session){
                  this.session = session;
-                 webSocketSet.add(this);     //加入set中
+                 webSocketList.add(this);     //加入set中
                  addOnlineCount();           //在线数加1
                  System.out.println("有新连接加入！当前在线人数为" + getOnlineCount());
              }
@@ -52,7 +54,7 @@ public class WebSocketSetController {
      */
     @OnClose
     public void onClose() {
-        webSocketSet.remove(this);  //从set中删除
+        webSocketList.remove(this);  //从set中删除
         subOnlineCount();           //在线数减1
         System.out.println("有一连接关闭！当前在线人数为" + getOnlineCount());
     }
@@ -66,14 +68,7 @@ public class WebSocketSetController {
     @OnMessage
     public void onMessage(String message, Session session) {
         System.out.println("来自客户端的消息:" + message);
-        //群发消息
-        for (WebSocketSetController item : webSocketSet) {
-            try {
-                item.sendMessage(message);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+
     }
 
     /**
@@ -100,14 +95,14 @@ public class WebSocketSetController {
     }
 
     public static int getOnlineCount() {
-        return WebSocketSetController.onlineCount.get();
+        return WebSocketListController.onlineCount.get();
     }
 
     public static void addOnlineCount() {
-        WebSocketSetController.onlineCount.incrementAndGet();
+        WebSocketListController.onlineCount.incrementAndGet();
     }
 
     public static void subOnlineCount() {
-        WebSocketSetController.onlineCount.decrementAndGet();
+        WebSocketListController.onlineCount.decrementAndGet();
     }
 }
