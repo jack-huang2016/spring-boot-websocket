@@ -26,5 +26,6 @@ public class myMvcConfig implements WebMvcConfigurer {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/client").setViewName("client");
         registry.addViewController("/client_map").setViewName("client_map");
+        registry.addViewController("/ws").setViewName("ws");
     }
 }
