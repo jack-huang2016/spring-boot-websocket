@@ -34,9 +34,9 @@
     }
 
     function  connect() {
-        var socket = new SockJS('/endpointWisely');
-        stompClient = Stomp.over(socket);
-        stompClient.connect({},function (frame) {
+        var socket = new SockJS('/myEndpoint');   // 表示连接的SockJS的endpoint名称为/myEndpoint
+        stompClient = Stomp.over(socket);  // 表示使用stomp来创建WebSocket客户端
+        stompClient.connect({},function (frame) {  // 连接服务端
             setConnected(true);
             console.log('connected'+ frame);
             // 通过stompClient.subscribe订阅/topic/getResponse目标发送的消息，这个是在控制器的@SendTo中定义的
