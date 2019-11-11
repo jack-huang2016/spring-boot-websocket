@@ -35,7 +35,7 @@
 
     function  connect() {
         var socket = new SockJS('/myEndpoint');   // 表示连接的SockJS的endpoint名称为/myEndpoint
-        stompClient = Stomp.over(socket);  // 表示使用stomp来创建WebSocket客户端
+        stompClient = Stomp.over(socket);  // 表示使用stomp协议来创建WebSocket客户端
         stompClient.connect({},function (frame) {  // 连接服务端
             setConnected(true);
             console.log('connected'+ frame);
@@ -57,6 +57,7 @@
 
     function  sendName() {
         var name = $('#name').val();
+		// 通过stompClient.send向/welcome目标发送消息，这个是在控制器的@MessageMapping中定义的
         stompClient.send('/welcome',{},JSON.stringify({'name':name}));
     }
     function  showResponse(message) {

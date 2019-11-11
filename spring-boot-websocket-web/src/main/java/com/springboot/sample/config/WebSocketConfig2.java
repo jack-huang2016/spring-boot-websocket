@@ -23,7 +23,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
  * @since 1.0.0
  */
 @Configuration
-@EnableWebSocketMessageBroker  //开启stomp协议来传输基于代理(message broker)的消息
+@EnableWebSocketMessageBroker  //开启使用stomp协议来传输基于代理(message broker)的消息，这时控制器支持使用@MessageMapping，就像使用@RequestMapping一样
 public class WebSocketConfig2 implements WebSocketMessageBrokerConfigurer {
 
     /**
